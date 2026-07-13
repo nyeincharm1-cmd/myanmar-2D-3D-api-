@@ -1,32 +1,32 @@
-const express = require('express');
-const cors = require('cors');
-const axios = require('axios');
-const app = express();
-
-app.use(cors());
-
-const port = process.env.PORT || 3000;
-
-// 1. Live Data API
-app.get('/api/data', async (req, res) => {
-    try {
-        const response = await axios.get('https://api.thaistock2d.com/live');
-        res.json(response.data);
-    } catch (error) {
-        res.status(500).json({ error: "Live Data ဆွဲမရပါ" });
-    }
-});
-
-// 2. History Data API (ဒါလေးရှိမှ History တက်မှာပါ)
+// Last 10 days 2D results
 app.get('/api/2d-history', async (req, res) => {
-    try {
-        const response = await axios.get('https://api.thaistock2d.com/2d_history');
-        res.json(response.data);
-    } catch (error) {
-        res.status(500).json({ error: "History Data ဆွဲမရပါ" });
-    }
-});
+  try {
+    const { date } = req.query;
 
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+    const url = date
+      ? `https://api.thaistock2d.com/2d_result?date=${encodeURIComponent(date)}`
+      : 'https://api.thaistock2d.com/2d_result';
+
+    const response = await axios.get(url, {
+      timeout: 15000
+    });
+
+    let data = response.data;
+
+    // Upstream API returns JSON as text sometimes
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch {
+        // Keep original response if it is not valid JSON
+      }
+    }
+
+    res.json(data);
+  } catch (error) {
+    res.status(error.response?.status || 500).json({
+      error: 'History Data ဆွဲမရပါ',
+      message: error.message
+    });
+  }
 });
