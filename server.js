@@ -17,10 +17,10 @@ app.get('/api/data', async (req, res) => {
     }
 });
 
-// 2. History Data API (ဒါလေးရှိမှ History တက်မှာပါ)
+// 2. History Data API (URL ပြောင်းပြီးပါပြီ)
 app.get('/api/2d-history', async (req, res) => {
     try {
-        const response = await axios.get('https://api.thaistock2d.com/2d_history');
+        const response = await axios.get('https://api.thaistock2d.com/2d_result');
         res.json(response.data);
     } catch (error) {
         res.status(500).json({ error: "History Data ဆွဲမရပါ" });
